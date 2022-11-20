@@ -2,7 +2,6 @@ package com.oheers.fish.utils;
 
 import com.oheers.fish.EvenMoreFish;
 import com.oheers.fish.FishUtils;
-import dev.lone.itemsadder.api.CustomStack;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -174,25 +173,6 @@ public class ItemFactory {
         String mValue = this.configurationFile.getString(configLocation + ".item.material");
         if (mValue == null) {
             return null;
-        }
-
-        if (mValue.contains("itemsadder:")) {
-
-            String[] splitMaterialValue = mValue.split(":");
-            if (splitMaterialValue.length != 3) {
-                EvenMoreFish.logger.severe(() -> String.format("%s has an incorrect assigned material: %s", configLocation, mValue));
-                return new ItemStack(Material.COD);
-            }
-
-            final String namespaceId = splitMaterialValue[1] + ":" + splitMaterialValue[2];
-            final CustomStack customStack = CustomStack.getInstance(namespaceId);
-            if (customStack == null) {
-                if(EvenMoreFish.itemsAdderLoaded) {
-                    EvenMoreFish.logger.info(() -> String.format("Could not obtain itemsadder item %s", namespaceId));
-                }
-                return new ItemStack(Material.COD);
-            }
-            return CustomStack.getInstance(namespaceId).getItemStack();
         }
 
         Material material = Material.getMaterial(mValue.toUpperCase());

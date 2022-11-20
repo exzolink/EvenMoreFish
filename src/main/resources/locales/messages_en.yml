@@ -60,7 +60,7 @@ fish-lore:
   - "{length_lore}"
   - ""
   - "{fish_lore}"
-  - "{rarity_colour}&l{rarity}"
+  - "{rarity_colour}{rarity}"
 
 # Sets what to replace with the {fisherman_lore} or {length_lore} with above ^
 fisherman-lore:

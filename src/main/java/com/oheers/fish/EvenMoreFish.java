@@ -2,7 +2,6 @@ package com.oheers.fish;
 
 import com.oheers.fish.api.EMFAPI;
 import com.oheers.fish.baits.Bait;
-import com.oheers.fish.baits.BaitApplicationListener;
 import com.oheers.fish.competition.AutoRunner;
 import com.oheers.fish.competition.Competition;
 import com.oheers.fish.competition.CompetitionQueue;
@@ -22,12 +21,9 @@ import com.oheers.fish.fishing.items.Rarity;
 import com.oheers.fish.gui.FillerStyle;
 import com.oheers.fish.selling.InteractHandler;
 import com.oheers.fish.selling.SellGUI;
-import com.oheers.fish.utils.AntiCraft;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
-import org.bstats.bukkit.Metrics;
-import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -155,28 +151,12 @@ public class EvenMoreFish extends JavaPlugin {
         competitionQueue = new CompetitionQueue();
         competitionQueue.load();
 
-        // async check for updates on the spigot page
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            isUpdateAvailable = checkUpdate();
-            try {
-                checkConfigVers();
-            } catch (IOException exception) {
-                logger.log(Level.WARNING, "Could not update messages.yml");
-            }
-        });
-
-        if (Bukkit.getPluginManager().getPlugin("ItemsAdder") != null) {
-            Bukkit.getPluginManager().registerEvents(new ItemsAdderLoadEvent(this), this);
-        }
-
         listeners();
         commands();
 
-        if (!mainConfig.debugSession()) metrics();
-
         AutoRunner.init();
 
-        wgPlugin = getWorldGuard();
+        wgPlugin = null;
         checkPapi();
 
         if (EvenMoreFish.mainConfig.databaseEnabled()) {
@@ -240,9 +220,7 @@ public class EvenMoreFish extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new JoinChecker(), this);
         getServer().getPluginManager().registerEvents(new FishingProcessor(), this);
         getServer().getPluginManager().registerEvents(new InteractHandler(this), this);
-        getServer().getPluginManager().registerEvents(new UpdateNotify(), this);
-        getServer().getPluginManager().registerEvents(new SkullSaver(), this);
-        getServer().getPluginManager().registerEvents(new BaitApplicationListener(), this);
+        //getServer().getPluginManager().registerEvents(new BaitApplicationListener(), this);
 
         optionalListeners();
     }
@@ -255,49 +233,10 @@ public class EvenMoreFish extends JavaPlugin {
         if (checkingIntEvent) {
             getServer().getPluginManager().registerEvents(FishInteractEvent.getInstance(), this);
         }
-
-        if (mainConfig.blockCrafting()) {
-            getServer().getPluginManager().registerEvents(new AntiCraft(), this);
-        }
-
-        if (Bukkit.getPluginManager().getPlugin("mcMMO") != null) {
-            usingMcMMO = true;
-            if (mainConfig.disableMcMMOTreasure()) {
-                getServer().getPluginManager().registerEvents(McMMOTreasureEvent.getInstance(), this);
-            }
-        }
-
-        if (Bukkit.getPluginManager().getPlugin("AureliumSkills") != null) {
-            if (mainConfig.disableAureliumSkills()) {
-                getServer().getPluginManager().registerEvents(AureliumSkillsFishingEvent.getInstance(), this);
-            }
-        }
-    }
-
-    private void metrics() {
-        Metrics metrics = new Metrics(this, METRIC_ID);
-
-        metrics.addCustomChart(new SingleLineChart("fish_caught", () -> {
-            int returning = metric_fishCaught;
-            metric_fishCaught = 0;
-            return returning;
-        }));
-
-        metrics.addCustomChart(new SingleLineChart("baits_applied", () -> {
-            int returning = metric_baitsApplied;
-            metric_baitsApplied = 0;
-            return returning;
-        }));
-
-        metrics.addCustomChart(new SingleLineChart("baits_used", () -> {
-            int returning = metric_baitsUsed;
-            metric_baitsUsed = 0;
-            return returning;
-        }));
     }
 
     private void commands() {
-        getCommand("evenmorefish").setExecutor(new CommandCentre(this));
+        getCommand("fish").setExecutor(new CommandCentre(this));
         CommandCentre.loadTabCompletes();
     }
 
@@ -380,7 +319,6 @@ public class EvenMoreFish extends JavaPlugin {
 
         HandlerList.unregisterAll(FishEatEvent.getInstance());
         HandlerList.unregisterAll(FishInteractEvent.getInstance());
-        HandlerList.unregisterAll(McMMOTreasureEvent.getInstance());
         optionalListeners();
 
         mainConfig.reload();
@@ -391,25 +329,6 @@ public class EvenMoreFish extends JavaPlugin {
         competitionWorlds = competitionConfig.getRequiredWorlds();
 
         competitionQueue.load();
-    }
-
-    // Checks for updates, surprisingly
-    private boolean checkUpdate() {
-
-
-        String[] spigotVersion = new UpdateChecker(this, 91310).getVersion().split("\\.");
-        String[] serverVersion = getDescription().getVersion().split("\\.");
-
-        for (int i = 0; i < serverVersion.length; i++) {
-            if (i < spigotVersion.length) {
-                if (Integer.parseInt(spigotVersion[i]) > Integer.parseInt(serverVersion[i])) {
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        }
-        return false;
     }
 
     private void checkConfigVers() throws IOException {

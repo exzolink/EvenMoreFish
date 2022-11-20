@@ -6,6 +6,7 @@ import com.oheers.fish.fishing.items.Fish;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -42,6 +43,16 @@ public class FishInteractEvent implements Listener {
                 for (Reward r : fish.getActionRewards()) {
                     r.run(event.getPlayer(), null);
                 }
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onPlace(BlockPlaceEvent event) {
+        ItemStack stack = event.getItemInHand();
+        if (stack != null) {
+            if (FishUtils.isFish(stack)) {
+                event.setCancelled(true);
             }
         }
     }

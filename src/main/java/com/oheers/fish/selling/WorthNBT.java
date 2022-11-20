@@ -11,7 +11,6 @@ import org.bukkit.block.Skull;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class WorthNBT {
 
@@ -20,10 +19,11 @@ public class WorthNBT {
         NBTItem nbtItem = new NBTItem(fishItem);
 
         NBTCompound emfCompound = nbtItem.getOrCreateCompound(NbtUtils.Keys.EMF_COMPOUND);
-        if (fish.getLength() > 0)
-            emfCompound.setFloat(NbtUtils.Keys.EMF_FISH_LENGTH, fish.getLength());
-        if (!fish.hasFishermanDisabled() && fish.getFisherman() != null)
+        emfCompound.setFloat(NbtUtils.Keys.EMF_FISH_LENGTH, fish.getLength());
+
+        if (!fish.hasFishermanDisabled() && fish.getFisherman() != null) {
             emfCompound.setString(NbtUtils.Keys.EMF_FISH_PLAYER, fish.getFisherman().toString());
+        }
         emfCompound.setString(NbtUtils.Keys.EMF_FISH_NAME, fish.getName());
         emfCompound.setString(NbtUtils.Keys.EMF_FISH_RARITY, fish.getRarity().getValue());
         emfCompound.setInteger(NbtUtils.Keys.EMF_FISH_RANDOM_INDEX, fish.getFactory().getChosenRandomIndex());
@@ -32,18 +32,17 @@ public class WorthNBT {
     }
 
     public static void setNBT(Skull fishSkull, Fish fish) {
-        NamespacedKey nbtlength = new NamespacedKey(JavaPlugin.getProvidingPlugin(WorthNBT.class), NbtUtils.Keys.EMF_FISH_LENGTH);
-        NamespacedKey nbtplayer = new NamespacedKey(JavaPlugin.getProvidingPlugin(WorthNBT.class), NbtUtils.Keys.EMF_FISH_PLAYER);
-        NamespacedKey nbtrarity = new NamespacedKey(JavaPlugin.getProvidingPlugin(WorthNBT.class), NbtUtils.Keys.EMF_FISH_RARITY);
-        NamespacedKey nbtname = new NamespacedKey(JavaPlugin.getProvidingPlugin(WorthNBT.class), NbtUtils.Keys.EMF_FISH_NAME);
-        NamespacedKey nbtrandomIndex = new NamespacedKey(JavaPlugin.getProvidingPlugin(WorthNBT.class), NbtUtils.Keys.EMF_FISH_RANDOM_INDEX);
+        NamespacedKey nbtlength = new NamespacedKey(EvenMoreFish.getInstance(), NbtUtils.Keys.EMF_FISH_LENGTH);
+        NamespacedKey nbtplayer = new NamespacedKey(EvenMoreFish.getInstance(), NbtUtils.Keys.EMF_FISH_PLAYER);
+        NamespacedKey nbtrarity = new NamespacedKey(EvenMoreFish.getInstance(), NbtUtils.Keys.EMF_FISH_RARITY);
+        NamespacedKey nbtname = new NamespacedKey(EvenMoreFish.getInstance(), NbtUtils.Keys.EMF_FISH_NAME);
+        NamespacedKey nbtrandomIndex = new NamespacedKey(EvenMoreFish.getInstance(), NbtUtils.Keys.EMF_FISH_RANDOM_INDEX);
 
         PersistentDataContainer itemMeta = fishSkull.getPersistentDataContainer();
-
-        if (fish.getLength() > 0)
-            itemMeta.set(nbtlength, PersistentDataType.FLOAT, fish.getLength());
-        if (fish.getFisherman() != null && !fish.hasFishermanDisabled())
+        itemMeta.set(nbtlength, PersistentDataType.FLOAT, fish.getLength());
+        if (fish.getFisherman() != null && !fish.hasFishermanDisabled()) {
             itemMeta.set(nbtplayer, PersistentDataType.STRING, fish.getFisherman().toString());
+        }
         itemMeta.set(nbtrandomIndex, PersistentDataType.INTEGER, fish.getFactory().getChosenRandomIndex());
         itemMeta.set(nbtrarity, PersistentDataType.STRING, fish.getRarity().getValue());
         itemMeta.set(nbtname, PersistentDataType.STRING, fish.getName());
@@ -55,23 +54,22 @@ public class WorthNBT {
             return -1.0;
         }
 
-
         NBTItem nbtItem = new NBTItem(item);
         // it's a fish so it'll definitely have these NBT values
         Float length = NbtUtils.getFloat(nbtItem, NbtUtils.Keys.EMF_FISH_LENGTH);
         String rarity = NbtUtils.getString(nbtItem, NbtUtils.Keys.EMF_FISH_RARITY);
         String name = NbtUtils.getString(nbtItem, NbtUtils.Keys.EMF_FISH_NAME);
 
-
         // gets a possible set-worth in the fish.yml
         try {
             int configValue = EvenMoreFish.fishFile.getConfig().getInt("fish." + rarity + "." + name + ".set-worth");
-            if (configValue == 0)
+            if (configValue == 0) {
                 throw new NullPointerException();
+            }
             return configValue;
         } catch (NullPointerException npe) {
             // there's no set-worth so we're calculating the worth ourselves
-            return length != null && length > 0 ? getMultipliedValue(length, rarity, name) : 0;
+            return length != null ? getMultipliedValue(length, rarity, name) : 0;
         }
     }
 
@@ -88,6 +86,31 @@ public class WorthNBT {
 
     private static double getMultipliedValue(Float length, String rarity, String name) {
         double worthMultiplier = getWorthMultiplier(rarity, name);
+
+        if (length == -1F) {
+            switch (rarity.toLowerCase()) {
+                case "обычная": {
+                    length = 10F;
+                    break;
+                }
+                case "редкая": {
+                    length = 60F;
+                    break;
+                }
+                case "роскошная": {
+                    length = 400F;
+                    break;
+                }
+                case "легендарная": {
+                    length = 2000F;
+                    break;
+                }
+                default: {
+                    length = 100F;
+                }
+            }
+        }
+
         double value = multipleWorthByLength(worthMultiplier, length);
         return sortFunkyDecimals(value);
     }

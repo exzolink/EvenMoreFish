@@ -72,7 +72,7 @@ public class JoinChecker implements Listener {
                                         public void run() {
                                             EvenMoreFish.userReports.put(userUUID, finalReport);
                                         }
-                                    }.runTask(JavaPlugin.getProvidingPlugin(JoinChecker.class));
+                                    }.runTask(EvenMoreFish.getInstance());
                                 }
                             } else {
                                 UserReport finalReport = report;
@@ -81,7 +81,7 @@ public class JoinChecker implements Listener {
                                     public void run() {
                                         EvenMoreFish.userReports.put(userUUID, finalReport);
                                     }
-                                }.runTask(JavaPlugin.getProvidingPlugin(JoinChecker.class));
+                                }.runTask(EvenMoreFish.getInstance());
                             }
                         } catch (SQLException exception) {
                             EvenMoreFish.logger.log(Level.SEVERE, "Could not fetch user reports for: " + userUUID);
@@ -96,7 +96,7 @@ public class JoinChecker implements Listener {
                         exception.printStackTrace();
                     }
                 }
-            }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(JoinChecker.class));
+            }.runTaskAsynchronously(EvenMoreFish.getInstance());
         }
     }
 
@@ -106,7 +106,7 @@ public class JoinChecker implements Listener {
         if (Competition.isActive()) {
             EvenMoreFish.active.getStatusBar().addPlayer(event.getPlayer());
             EvenMoreFish.active.getStartMessage().setMessage(ConfigMessage.COMPETITION_JOIN);
-            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(EvenMoreFish.getPlugin(EvenMoreFish.class),
+            Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(EvenMoreFish.getInstance(),
                     () -> EvenMoreFish.active.getStartMessage().broadcast(event.getPlayer(), true, true), 20 * 3);
         }
 
@@ -116,7 +116,7 @@ public class JoinChecker implements Listener {
             public void run() {
                 databaseRegistration(event.getPlayer().getUniqueId(), event.getPlayer().getName());
             }
-        }.runTaskAsynchronously(EvenMoreFish.getProvidingPlugin(EvenMoreFish.class));
+        }.runTaskAsynchronously(EvenMoreFish.getInstance());
     }
 
     // Removes the player from the bar list if they leave the server
@@ -175,7 +175,7 @@ public class JoinChecker implements Listener {
                                 }
                                 EvenMoreFish.v3Semaphore.release();
                             }
-                        }.runTask(JavaPlugin.getProvidingPlugin(JoinChecker.class));
+                        }.runTask(EvenMoreFish.getInstance());
                     } catch (SQLException exception) {
                         EvenMoreFish.logger.log(Level.SEVERE, "Failed SQL operations whilst writing data for user " + event.getPlayer().getName() + ". Try restarting or contacting support.");
                         exception.printStackTrace();
@@ -184,7 +184,7 @@ public class JoinChecker implements Listener {
                         exception.printStackTrace();
                     }
                 }
-            }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(JoinChecker.class));
+            }.runTaskAsynchronously(EvenMoreFish.getInstance());
         }
     }
 }

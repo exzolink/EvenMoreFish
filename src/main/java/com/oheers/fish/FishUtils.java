@@ -17,6 +17,7 @@ import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.tr7zw.changeme.nbtapi.NBTListCompound;
 import de.tr7zw.changeme.nbtapi.NBTTileEntity;
+import java.nio.charset.StandardCharsets;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -67,9 +68,9 @@ public class FishUtils {
         Float lengthFloat = NbtUtils.getFloat(nbtItem, NbtUtils.Keys.EMF_FISH_LENGTH);
         Integer randomIndex = NbtUtils.getInteger(nbtItem, NbtUtils.Keys.EMF_FISH_RANDOM_INDEX);
 
-        if (nameString == null || rarityString == null)
+        if (nameString == null || rarityString == null) {
             return null; //throw new InvalidFishException("NBT Error");
-
+        }
 
         // Generating an empty rarity
         Rarity rarity = null;
@@ -83,14 +84,18 @@ public class FishUtils {
         // setting the correct length so it's an exact replica.
         try {
             Fish fish = new Fish(rarity, nameString);
-            if (randomIndex != null) fish.getFactory().setType(randomIndex);
+            if (randomIndex != null) {
+                fish.getFactory().setType(randomIndex);
+            }
             fish.setLength(lengthFloat);
-            if (playerString != null) fish.setFisherman(UUID.fromString(playerString));
+            if (playerString != null) {
+                fish.setFisherman(UUID.fromString(playerString));
+            }
 
             return fish;
         } catch (InvalidFishException exception) {
-            EvenMoreFish.logger.log(Level.SEVERE, "Could not create fish from an ItemStack with rarity " + rarityString + " and name " + nameString + ". You may have" +
-                    "deleted the fish since this fish was caught.");
+            EvenMoreFish.logger.log(Level.SEVERE, "Could not create fish from an ItemStack with rarity " + rarityString + " and name " + nameString + ". You may have"
+                    + "deleted the fish since this fish was caught.");
         }
 
         return null;
@@ -106,8 +111,9 @@ public class FishUtils {
         Float lengthFloat = NbtUtils.getFloat(nbtSkull, NbtUtils.Keys.EMF_FISH_LENGTH);
         Integer randomIndex = NbtUtils.getInteger(nbtSkull, NbtUtils.Keys.EMF_FISH_RANDOM_INDEX);
 
-        if (nameString == null || rarityString == null)
+        if (nameString == null || rarityString == null) {
             throw new InvalidFishException("NBT Error");
+        }
 
         // Generating an empty rarity
         Rarity rarity = null;
@@ -141,10 +147,10 @@ public class FishUtils {
         player.getInventory().addItem(items.toArray(new ItemStack[0]))
                 .values()
                 .forEach(item -> new BukkitRunnable() {
-                    public void run() {
-                        player.getWorld().dropItem(player.getLocation(), item);
-                    }
-                }.runTask(JavaPlugin.getProvidingPlugin(FishUtils.class)));
+            public void run() {
+                player.getWorld().dropItem(player.getLocation(), item);
+            }
+        }.runTask(JavaPlugin.getProvidingPlugin(FishUtils.class)));
     }
 
     public static boolean checkRegion(Location l, List<String> whitelistedRegions) {
@@ -166,7 +172,9 @@ public class FishUtils {
 
             // runs the query
             for (ProtectedRegion pr : set) {
-                if (whitelistedRegions.contains(pr.getId())) return true;
+                if (whitelistedRegions.contains(pr.getId())) {
+                    return true;
+                }
             }
             return false;
         } else if (EvenMoreFish.guardPL.equals("redprotect")) {
@@ -219,7 +227,7 @@ public class FishUtils {
         final ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
         NBTItem nbtItem = new NBTItem(skull);
         NBTCompound nbtCompound = nbtItem.addCompound("SkullOwner");
-        nbtCompound.setString("Id", UUID.randomUUID().toString());
+        nbtCompound.setString("Id", UUID.nameUUIDFromBytes(base64EncodedString.getBytes(StandardCharsets.UTF_8)).toString());
 
         NBTListCompound texture = nbtCompound.addCompound("Properties").getCompoundList("textures").addCompound();
         texture.setString("Value", base64EncodedString);
@@ -290,8 +298,8 @@ public class FishUtils {
     }
 
     /**
-     * Determines whether the bait has the emf nbt tag "bait:", this can be used to decide whether this is a bait that
-     * can be applied to a rod or not.
+     * Determines whether the bait has the emf nbt tag "bait:", this can be used
+     * to decide whether this is a bait that can be applied to a rod or not.
      *
      * @param item The item being considered.
      * @return Whether this ItemStack is a bait.

@@ -4,7 +4,6 @@ import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -124,7 +123,7 @@ public class NbtUtils {
 
     @Contract("_ -> new")
     private static @NotNull NamespacedKey getNamespacedKey(final String key) {
-        return new NamespacedKey(JavaPlugin.getProvidingPlugin(NbtUtils.class), key);
+        return new NamespacedKey(EvenMoreFish.getInstance(), key);
     }
 
 
@@ -135,7 +134,7 @@ public class NbtUtils {
     }
 
     public static class Keys {
-        public static final String EMF_COMPOUND = JavaPlugin.getProvidingPlugin(NbtUtils.class).getName().toLowerCase(Locale.ROOT);
+        public static final String EMF_COMPOUND = EvenMoreFish.getInstance().getName().toLowerCase(Locale.ROOT);
         public static final String EMF_FISH_PLAYER = "emf-fish-player";
         public static final String EMF_FISH_RARITY = "emf-fish-rarity";
         public static final String EMF_FISH_LENGTH = "emf-fish-length";

@@ -60,7 +60,9 @@ public class Fish implements Cloneable {
                 EvenMoreFish.raritiesFile.getConfig().getBoolean("rarities." + this.rarity.getValue() + ".disable-fisherman", false)
         );
 
-        if (rarity == null) throw new InvalidFishException(name + " could not be fetched from the config.");
+        if (rarity == null) {
+            throw new InvalidFishException(name + " could not be fetched from the config.");
+        }
 
         this.factory = new ItemFactory("fish." + this.rarity.getValue() + "." + this.name);
         checkDisplayName();
@@ -85,20 +87,26 @@ public class Fish implements Cloneable {
     /**
      * Returns the item stack version of the fish to be given to the player.
      *
-     * @param randomIndex If the value isn't -1 then a specific index of the random results of the fish will be chosen,
-     *                    relying on the fact that it's a fish doing random choices. If it is -1 then a random one will
-     *                    be rolled.
+     * @param randomIndex If the value isn't -1 then a specific index of the
+     * random results of the fish will be chosen, relying on the fact that it's
+     * a fish doing random choices. If it is -1 then a random one will be
+     * rolled.
      * @return An ItemStack version of the fish.
      */
     public ItemStack give(int randomIndex) {
 
         ItemStack fish = factory.createItem(getFishermanPlayer(), randomIndex);
-        if (factory.isRawMaterial()) return fish;
+        if (factory.isRawMaterial()) {
+            return fish;
+        }
         ItemMeta fishMeta;
 
         if ((fishMeta = fish.getItemMeta()) != null) {
-            if (displayName != null) fishMeta.setDisplayName(FishUtils.translateHexColorCodes(displayName));
-            else fishMeta.setDisplayName(FishUtils.translateHexColorCodes(rarity.getColour() + name));
+            if (displayName != null) {
+                fishMeta.setDisplayName(FishUtils.translateHexColorCodes(displayName));
+            } else {
+                fishMeta.setDisplayName(FishUtils.translateHexColorCodes(rarity.getColour() + name));
+            }
 
             fishMeta.setLore(getFishLore());
 
@@ -148,7 +156,9 @@ public class Fish implements Cloneable {
     public boolean hasEatRewards() {
         if (eventType != null) {
             return eventType.equals("eat");
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     public boolean hasFishRewards() {
@@ -158,7 +168,9 @@ public class Fish implements Cloneable {
     public boolean hasIntRewards() {
         if (eventType != null) {
             return eventType.equals("int");
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     // checks if the config contains a message to be displayed when the fish is fished
@@ -177,12 +189,15 @@ public class Fish implements Cloneable {
         String effectConfig = EvenMoreFish.fishFile.getConfig().getString("fish." + this.rarity.getValue() + "." + this.name + ".effect");
 
         // if the config doesn't have an effect stated to be given
-        if (effectConfig == null) return;
+        if (effectConfig == null) {
+            return;
+        }
 
         String[] separated = effectConfig.split(":");
         // if it's formatted wrong, it'll just give the player this as a stock effect
-        if (separated.length != 3)
+        if (separated.length != 3) {
             Objects.requireNonNull(Bukkit.getPlayer(this.fisherman)).addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 1));
+        }
 
         PotionEffectType effect = PotionEffectType.getByName(separated[0].toUpperCase());
         int amplitude = Integer.parseInt(separated[1]);
@@ -206,42 +221,52 @@ public class Fish implements Cloneable {
         checkEffects();
     }
 
+    public void setNullSize() {
+        this.length = -1f;
+    }
+
     /**
-     * From the new method of fetching the lore, where the admin specifies exactly how they want the lore to be set up,
-     * letting them modify the order, add a twist to how they want extra details and so on.
+     * From the new method of fetching the lore, where the admin specifies
+     * exactly how they want the lore to be set up, letting them modify the
+     * order, add a twist to how they want extra details and so on.
      * <p>
-     * It goes through each line of the Messages' getFishLoreFormat, if the line is just {fish_lore} then it gets replaced
-     * with a fish's lore value, if not then nothing is done.
+     * It goes through each line of the Messages' getFishLoreFormat, if the line
+     * is just {fish_lore} then it gets replaced with a fish's lore value, if
+     * not then nothing is done.
      *
-     * @return A lore to be used by fetching data from the old messages.yml set-up.
+     * @return A lore to be used by fetching data from the old messages.yml
+     * set-up.
      */
     private List<String> getFishLore() {
         Message newLoreLine = new Message(ConfigMessage.FISH_LORE);
         newLoreLine.setRarityColour(rarity.getColour());
 
         newLoreLine.addLore(
-            "{fish_lore}",
-            EvenMoreFish.fishFile.getConfig().getStringList("fish." + this.rarity.getValue() + "." + this.name + ".lore")
+                "{fish_lore}",
+                EvenMoreFish.fishFile.getConfig().getStringList("fish." + this.rarity.getValue() + "." + this.name + ".lore")
         );
 
-        newLoreLine.setVariable("{fisherman_lore}",
-            !disableFisherman && getFishermanPlayer() != null ?
-                (new Message(ConfigMessage.FISHERMAN_LORE)).message
-                : ""
-        );
+        newLoreLine.setVariable("{fisherman_lore}", (new Message(ConfigMessage.FISHERMAN_LORE)).message);
 
-        if (!disableFisherman && getFishermanPlayer() != null) newLoreLine.setPlayer(getFishermanPlayer().getName());
+        if (!disableFisherman && getFishermanPlayer() != null && length > 0) {
+            newLoreLine.setPlayer(getFishermanPlayer().getName());
+        } else {
+            newLoreLine.setPlayer("Робот " + getFishermanPlayer().getName());
+        }
 
-        newLoreLine.setVariable("{length_lore}",
-            length > 0 ?
-                (new Message(ConfigMessage.LENGTH_LORE)).message
-                : ""
-        );
+        newLoreLine.setVariable("{length_lore}", (new Message(ConfigMessage.LENGTH_LORE)).message);
 
-        if (length > 0) newLoreLine.setLength(Float.toString(length));
+        if (length > 0) {
+            newLoreLine.setLength(Float.toString(length) + " см");
+        } else {
+            newLoreLine.setLength("???");
+        }
 
-        if (rarity.getDisplayName() != null) newLoreLine.setRarity(rarity.getDisplayName());
-        else newLoreLine.setRarity(this.rarity.getLorePrep());
+        if (rarity.getDisplayName() != null) {
+            newLoreLine.setRarity(rarity.getDisplayName());
+        } else {
+            newLoreLine.setRarity(this.rarity.getLorePrep());
+        }
 
         List<String> newLore = Arrays.asList(newLoreLine.getRawMessage(true, true).split("\n"));
         if (getFishermanPlayer() != null && EvenMoreFish.usingPAPI) {

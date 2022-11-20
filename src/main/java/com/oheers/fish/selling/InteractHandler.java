@@ -37,7 +37,7 @@ public class InteractHandler implements Listener {
                     gui.setSellItem();
                     gui.setSellAllItem();
                 }
-            }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(getClass()));
+            }.runTaskAsynchronously(EvenMoreFish.getInstance());
         } else {
             // determines what the player has clicked, or if they've just added an item
             // to the menu
@@ -99,7 +99,7 @@ public class InteractHandler implements Listener {
 
                         gui.error = false;
                     }
-                }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(getClass()));
+                }.runTaskAsynchronously(EvenMoreFish.getInstance());
             }
         }
     }

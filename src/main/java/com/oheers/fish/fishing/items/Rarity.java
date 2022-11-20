@@ -59,7 +59,7 @@ public class Rarity {
             if (this.getDisplayName() != null) {
                 return this.getDisplayName();
             } else {
-                return this.getColour() + "&l" + this.getValue().toUpperCase();
+                return this.getColour() + this.getValue().toUpperCase();
             }
 
         }

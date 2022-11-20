@@ -60,7 +60,7 @@ fish-lore:
   - "&fMisst {length}cm" # <------ THIS ONE
   - ""
   - "{fish_lore}"
-  - "{rarity_colour}&l{rarity}"
+  - "{rarity_colour}{rarity}"
 
 # The format of commands in /emf help (this message doesn't support papi placeholders)
 help: "/{command} - {description}"

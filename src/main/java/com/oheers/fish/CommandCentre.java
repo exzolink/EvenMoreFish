@@ -74,7 +74,7 @@ public class CommandCentre implements TabCompleter, CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, Command cmd, @NotNull String label, String[] args) {
 
         // Aliases are set in the plugin.yml
-        if (cmd.getName().equalsIgnoreCase("evenmorefish")) {
+        if (cmd.getName().equalsIgnoreCase("fish")) {
             if (args.length == 0) {
                 if (!EvenMoreFish.mainConfig.debugSession()) {
                     sender.sendMessage(Help.formGeneralHelp(sender));
