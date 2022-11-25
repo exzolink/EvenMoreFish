@@ -96,9 +96,12 @@ public class Fish implements Cloneable {
     public ItemStack give(int randomIndex) {
 
         ItemStack fish = factory.createItem(getFishermanPlayer(), randomIndex);
+        fish.setAmount(1);
+        
         if (factory.isRawMaterial()) {
             return fish;
         }
+        
         ItemMeta fishMeta;
 
         if ((fishMeta = fish.getItemMeta()) != null) {

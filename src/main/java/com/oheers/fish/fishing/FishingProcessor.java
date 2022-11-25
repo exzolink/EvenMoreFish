@@ -75,9 +75,8 @@ public class FishingProcessor implements Listener {
             Item nonCustom = (Item) event.getCaught();
             if (nonCustom != null) {
                 try {
-                    fish.setAmount(1);
                     nonCustom.setItemStack(fish);
-                } catch (IllegalArgumentException ex) {
+                } catch (Exception ex) {
                     event.getPlayer().getInventory().addItem(fish);
                     nonCustom.remove();
                     System.out.println("[WATCHFISHER] " + event.getPlayer().getName() + " поймал невалидный предмет " + fish.toString());
