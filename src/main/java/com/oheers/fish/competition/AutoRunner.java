@@ -9,7 +9,6 @@ import java.time.LocalTime;
 public class AutoRunner {
 
     static String timeKey;
-
     static int lastMinute;
 
     public static void init() {

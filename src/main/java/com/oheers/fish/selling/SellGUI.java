@@ -18,9 +18,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class SellGUI implements InventoryHolder {
+
+    private final static Map<UUID, Integer> playersLimits = new HashMap<>();
+    private final static Integer limitPerDay = 12000;
 
     private final Player player;
     private final Inventory menu;
@@ -78,7 +84,6 @@ public class SellGUI implements InventoryHolder {
             }
         }
     }
-
 
     public void setSellAllItem() {
         ItemStack saIcon = new ItemStack(EvenMoreFish.mainConfig.getSellAllMaterial());
@@ -138,8 +143,9 @@ public class SellGUI implements InventoryHolder {
     }
 
     /**
-     * Resets the glass colour to the default one after the error glass has been used due to a value of $0 in the shop.
-     * This prevents the red from hanging when the gold ingot / raw fish cod have returned.
+     * Resets the glass colour to the default one after the error glass has been
+     * used due to a value of $0 in the shop. This prevents the red from hanging
+     * when the gold ingot / raw fish cod have returned.
      */
     public void resetGlassColour() {
         addFiller(this.filler);
@@ -171,18 +177,33 @@ public class SellGUI implements InventoryHolder {
 
     public void createIcon(boolean sellAll) {
         String totalWorth = getTotalWorth(sellAll);
-        if (totalWorth.equals("0.0")) {
+        Integer playerLimit = playersLimits.get(player.getUniqueId());
+        if (playerLimit == null) {
+            playersLimits.put(player.getUniqueId(), 0);
+            playerLimit = playersLimits.get(player.getUniqueId());
+        }
+        int calculatedPlayerLimit = (int) (playerLimit + Double.parseDouble(totalWorth));
+
+        if (totalWorth.equals("0.0") || calculatedPlayerLimit >= limitPerDay) {
+
+            if (calculatedPlayerLimit >= limitPerDay) {
+                player.sendMessage(FishUtils.translateHexColorCodes("&3[Рыбак]&r &bДруг, я не смогу у тебя выкупить столько рыбы. Приходи завтра или предложи поменьше рыбы!"));
+            }
 
             ItemStack error;
-            if (sellAll) error = new ItemStack(EvenMoreFish.mainConfig.getSellAllErrorMaterial());
-            else error = new ItemStack(Material.valueOf(EvenMoreFish.mainConfig.getSellItemError()));
+            if (sellAll) {
+                error = new ItemStack(EvenMoreFish.mainConfig.getSellAllErrorMaterial());
+            } else {
+                error = new ItemStack(Material.valueOf(EvenMoreFish.mainConfig.getSellItemError()));
+            }
 
             ItemMeta errorMeta = error.getItemMeta();
 
-            if (sellAll)
+            if (sellAll) {
                 errorMeta.setDisplayName(new Message(ConfigMessage.WORTH_GUI_NO_VAL_ALL_BUTTON_NAME).getRawMessage(true, false));
-            else
+            } else {
                 errorMeta.setDisplayName(new Message(ConfigMessage.WORTH_GUI_NO_VAL_BUTTON_NAME).getRawMessage(true, false));
+            }
 
             if (sellAll) {
                 errorMeta.setLore(new ArrayList<>(Arrays.asList(new Message(ConfigMessage.WORTH_GUI_SELL_BUTTON_LORE).getRawMessage(true, false).split("\n"))));
@@ -192,20 +213,28 @@ public class SellGUI implements InventoryHolder {
 
             error.setItemMeta(errorMeta);
             glowify(error);
-            if (sellAll) this.sellAllErrorIcon = WorthNBT.attributeDefault(error);
-            else this.noValueIcon = WorthNBT.attributeDefault(error);
+            if (sellAll) {
+                this.sellAllErrorIcon = WorthNBT.attributeDefault(error);
+            } else {
+                this.noValueIcon = WorthNBT.attributeDefault(error);
+            }
             this.error = true;
         } else {
+            playersLimits.put(player.getUniqueId(), calculatedPlayerLimit);
 
             ItemStack confirm;
-            if (sellAll) confirm = new ItemStack(EvenMoreFish.mainConfig.getSellAllConfirmMaterial());
-            else confirm = new ItemStack(Material.valueOf(EvenMoreFish.mainConfig.getSellItemConfirm()));
+            if (sellAll) {
+                confirm = new ItemStack(EvenMoreFish.mainConfig.getSellAllConfirmMaterial());
+            } else {
+                confirm = new ItemStack(Material.valueOf(EvenMoreFish.mainConfig.getSellItemConfirm()));
+            }
 
             ItemMeta cMeta = confirm.getItemMeta();
-            if (sellAll)
+            if (sellAll) {
                 cMeta.setDisplayName(new Message(ConfigMessage.WORTH_GUI_CONFIRM_ALL_BUTTON_NAME).getRawMessage(true, false));
-            else
+            } else {
                 cMeta.setDisplayName(new Message(ConfigMessage.WORTH_GUI_CONFIRM_BUTTON_NAME).getRawMessage(true, false));
+            }
             // Generates the lore, looping through each line in messages.yml lore thingy, and generating it
             List<String> lore = new ArrayList<>();
 
@@ -223,8 +252,11 @@ public class SellGUI implements InventoryHolder {
             confirm.setItemMeta(cMeta);
             glowify(confirm);
 
-            if (sellAll) this.confirmSellAllIcon = WorthNBT.attributeDefault(confirm);
-            else this.confirmIcon = WorthNBT.attributeDefault(confirm);
+            if (sellAll) {
+                this.confirmSellAllIcon = WorthNBT.attributeDefault(confirm);
+            } else {
+                this.confirmIcon = WorthNBT.attributeDefault(confirm);
+            }
 
             this.error = false;
         }
@@ -254,8 +286,9 @@ public class SellGUI implements InventoryHolder {
     }
 
     public String getTotalWorth(boolean inventory) {
-        if (this.menu == null) return Double.toString(0.0d);
-
+        if (this.menu == null) {
+            return Double.toString(0.0d);
+        }
 
         double totalValue = 0.0d;
         int count = 0;
@@ -332,7 +365,9 @@ public class SellGUI implements InventoryHolder {
 
     public boolean sell(boolean sellAll) {
         getTotalWorth(sellAll);
-        if (EvenMoreFish.econ != null) EvenMoreFish.econ.depositPlayer(this.player, value);
+        if (EvenMoreFish.econ != null) {
+            EvenMoreFish.econ.depositPlayer(this.player, value);
+        }
 
         // sending the sell message to the player
         Message message = new Message(ConfigMessage.FISH_SALE);
@@ -345,7 +380,9 @@ public class SellGUI implements InventoryHolder {
 
         if (sellAll) {
             for (ItemStack item : this.player.getInventory()) {
-                if (FishUtils.isFish(item)) this.player.getInventory().remove(item);
+                if (FishUtils.isFish(item)) {
+                    this.player.getInventory().remove(item);
+                }
             }
         } else {
             // Remove sold items

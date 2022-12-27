@@ -102,7 +102,7 @@ public class WorthNBT {
                     break;
                 }
                 case "легендарная": {
-                    length = 2000F;
+                    length = 1800F;
                     break;
                 }
                 default: {
