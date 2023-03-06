@@ -26,7 +26,7 @@ import java.util.UUID;
 public class SellGUI implements InventoryHolder {
 
     private final static Map<UUID, Integer> playersLimits = new HashMap<>();
-    private final static Integer limitPerDay = 12000;
+    private final static Integer limitPerDay = 2000;
 
     private final Player player;
     private final Inventory menu;
