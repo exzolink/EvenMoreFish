@@ -237,4 +237,8 @@ public class MainConfig {
     public boolean debugSession() {
         return config.getBoolean("debug-session", false);
     }
+    
+    public int getShopLimit() {
+        return config.getInt("shop-limit");
+    }
 }

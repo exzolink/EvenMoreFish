@@ -26,7 +26,7 @@ import java.util.UUID;
 public class SellGUI implements InventoryHolder {
 
     private final static Map<UUID, Integer> playersLimits = new HashMap<>();
-    private final static Integer limitPerDay = 2000;
+    private final static int limitPerDay = EvenMoreFish.mainConfig.getShopLimit();
 
     private final Player player;
     private final Inventory menu;

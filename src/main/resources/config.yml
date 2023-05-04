@@ -51,6 +51,8 @@ requires-fishing-permission: false
 # the starfish into a beacon.
 block-crafting: true
 
+shop-limit: 3000
+
 # For customizing the /emf shop GUI
 gui:
   # Fills the empty slots of a normal /emf shop
